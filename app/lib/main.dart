@@ -36,6 +36,12 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserCount();
+  }
+
   void _fetchUserCount() async {
     try {
       final response = await client.get(Uri.parse('http://localhost:3000/users/count'));
@@ -63,25 +69,37 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
-      body: Center(
+      body: Container(
+        padding: const EdgeInsets.all(10.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'The backend holds this many users:',
-            ),
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+          Row(
+            children: <Widget>[
             Text(
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              Container(
+                padding: const EdgeInsets.only(top: 2.5, left: 2.0),
+                child: Icon(
+                  Icons.account_circle,
+                  color: Colors.black,
+                  size: Theme.of(context).textTheme.headlineMedium!.fontSize!,
+                  semanticLabel: 'Text to announce in accessibility modes',
+                  ),
+                )
+            ],
             ),
           ],
-        ),
+          ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _fetchUserCount,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
-    );
+          onPressed: _fetchUserCount,
+          tooltip: 'Increment',
+          child: const Icon(Icons.cached),
+          ),
+      );
   }
 }
