@@ -14,12 +14,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'User managment App',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'User managment App'),
     );
   }
 }
@@ -39,19 +39,20 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _fetchUserCount();
+    _fetchUserContent();
   }
 
-  void _fetchUserCount() async {
+  void _fetchUserContent() async {
     try {
-      final response = await client.get(Uri.parse('http://localhost:3000/users/count'));
+      final response =
+          await client.get(Uri.parse('http://localhost:3000/users/count'));
 
       if (response.statusCode == 200) {
         // If server returns a 200 OK response, parse the JSON.
         var data = jsonDecode(response.body);
         setState(() {
-            _counter = data['users_count'];
-            });
+          _counter = data['users_count'];
+        });
       } else {
         // If the server returns an error, throw an exception.
         print('Failed to load count');
@@ -71,35 +72,40 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Container(
         padding: const EdgeInsets.all(10.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
+        child: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
           Row(
-            children: <Widget>[
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-              ),
-              Container(
-                padding: const EdgeInsets.only(top: 2.5, left: 2.0),
-                child: Icon(
-                  Icons.account_circle,
-                  color: Colors.black,
-                  size: Theme.of(context).textTheme.headlineMedium!.fontSize!,
-                  semanticLabel: 'Text to announce in accessibility modes',
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Row(
+                children: <Widget>[
+                  Text(
+                    '$_counter',
+                    style: Theme.of(context).textTheme.headlineMedium,
                   ),
-                )
+                  Container(
+                    padding: const EdgeInsets.only(top: 2.5, left: 2.0),
+                    child: Icon(
+                      Icons.account_circle,
+                      color: Colors.black,
+                      size:
+                          Theme.of(context).textTheme.headlineMedium!.fontSize!,
+                      semanticLabel: 'Text to announce in accessibility modes',
+                    ),
+                  )
+                ],
+              ),
             ],
-            ),
-          ],
           ),
+          Container(
+              padding: const EdgeInsets.only(top: 10),
+              child: Text('TODO: List users here')),
+        ]),
       ),
       floatingActionButton: FloatingActionButton(
-          onPressed: _fetchUserCount,
-          tooltip: 'Increment',
-          child: const Icon(Icons.cached),
-          ),
-      );
+        onPressed: _fetchUserContent,
+        tooltip: 'Increment',
+        child: const Icon(Icons.cached),
+      ),
+    );
   }
 }
