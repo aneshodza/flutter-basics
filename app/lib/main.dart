@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:quiver/iterables.dart';
 
 var client = http.Client();
 
@@ -35,6 +36,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  List<Widget> _users = [];
 
   @override
   void initState() {
@@ -43,24 +45,40 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _fetchUserContent() async {
-    try {
-      final response =
-          await client.get(Uri.parse('http://localhost:3000/users/count'));
+    _fetchUserCount();
+    _fetchUserList();
+  }
 
-      if (response.statusCode == 200) {
-        // If server returns a 200 OK response, parse the JSON.
-        var data = jsonDecode(response.body);
-        setState(() {
-          _counter = data['users_count'];
-        });
-      } else {
-        // If the server returns an error, throw an exception.
-        print('Failed to load count');
-      }
-    } catch (e) {
-      // Handle any exceptions thrown during the request.
-      print('Error: $e');
-    }
+  void _fetchUserCount() async {
+    final response =
+        await client.get(Uri.parse('http://localhost:3000/users/count'));
+    var data = jsonDecode(response.body);
+    setState(() {
+      _counter = data['users_count'];
+    });
+  }
+
+  void _fetchUserList() async {
+    final response = await client.get(Uri.parse('http://localhost:3000/users'));
+
+    var data = jsonDecode(response.body);
+    mapUserList(partition(data['users'], 3).toList());
+  }
+
+  void mapUserList(List chunkedUsers) {
+    setState(() {
+      _users = chunkedUsers
+          .map(<Iterable>(userRow) {
+            List neededPads = List<Widget>.filled((3 - userRow.length) as int, VerticalDivider());
+            return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: userRow.map((user) {
+                  return Column(children: [Text(user['name'])]);
+                }).toList().cast<Widget>() + neededPads);
+          })
+          .toList()
+          .cast<Widget>();
+    });
   }
 
   @override
@@ -97,13 +115,16 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           ),
           Container(
-              padding: const EdgeInsets.only(top: 10),
-              child: Text('TODO: List users here')),
+            padding: const EdgeInsets.only(top: 10),
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: _users),
+          )
         ]),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _fetchUserContent,
-        tooltip: 'Increment',
+        tooltip: 'Reload',
         child: const Icon(Icons.cached),
       ),
     );

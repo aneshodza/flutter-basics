@@ -4,6 +4,9 @@ const port = 3000
 
 var users = [
   {name: 'Anes'},
+  {name: 'Alma'},
+  {name: 'Meriton'},
+  {name: 'Yassin'}
 ]
 
 app.get('/', (_, res) => {
