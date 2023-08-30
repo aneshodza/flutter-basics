@@ -1,3 +1,4 @@
+import 'package:app/objects/user.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -69,17 +70,30 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _users = chunkedUsers
           .map(<Iterable>(userRow) {
-            List neededPads = List<Widget>.filled((3 - userRow.length) as int, VerticalDivider());
-            return Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: userRow.map((user) {
-                  return Column(children: [Text(user['name'])]);
-                }).toList().cast<Widget>() + neededPads);
+            return mapUserRow(userRow);
           })
           .toList()
           .cast<Widget>();
     });
   }
+
+  Row mapUserRow(List userRow) {
+    List<Widget> neededPads =
+        List<Widget>.filled(3 - userRow.length, const VerticalDivider());
+    return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: userRow
+                .map((user) {
+                  return userView(User.fromMap(user));
+                })
+                .toList()
+                .cast<Widget>() +
+            neededPads);
+  }
+
+  Column userView(User user) {
+    return Column(children: [Text(user.username)]);
+  } 
 
   @override
   Widget build(BuildContext context) {

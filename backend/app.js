@@ -1,13 +1,10 @@
-const express = require('express')
+import { createRandomUsers } from './create_fake.js';
+import express from 'express';
+
 const app = express()
 const port = 3000
 
-var users = [
-  {name: 'Anes'},
-  {name: 'Alma'},
-  {name: 'Meriton'},
-  {name: 'Yassin'}
-]
+var users = createRandomUsers(10);
 
 app.get('/', (_, res) => {
   res.json({message: 'I\'m alive!'})
