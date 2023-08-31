@@ -1,14 +1,15 @@
+import 'dart:convert';
+
 import 'package:app/objects/user.dart';
 import 'package:flutter/material.dart';
-import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:quiver/iterables.dart';
-
-var client = http.Client();
 
 void main() {
   runApp(const MyApp());
 }
+
+var client = http.Client();
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -27,9 +28,9 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
   final String title;
+
+  const MyHomePage({super.key, required this.title});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -38,62 +39,6 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
   List<Widget> _users = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchUserContent();
-  }
-
-  void _fetchUserContent() async {
-    _fetchUserCount();
-    _fetchUserList();
-  }
-
-  void _fetchUserCount() async {
-    final response =
-        await client.get(Uri.parse('http://localhost:3000/users/count'));
-    var data = jsonDecode(response.body);
-    setState(() {
-      _counter = data['users_count'];
-    });
-  }
-
-  void _fetchUserList() async {
-    final response = await client.get(Uri.parse('http://localhost:3000/users'));
-
-    var data = jsonDecode(response.body);
-    mapUserList(partition(data['users'], 3).toList());
-  }
-
-  void mapUserList(List chunkedUsers) {
-    setState(() {
-      _users = chunkedUsers
-          .map(<Iterable>(userRow) {
-            return mapUserRow(userRow);
-          })
-          .toList()
-          .cast<Widget>();
-    });
-  }
-
-  Row mapUserRow(List userRow) {
-    List<Widget> neededPads =
-        List<Widget>.filled(3 - userRow.length, const VerticalDivider());
-    return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: userRow
-                .map((user) {
-                  return userView(User.fromMap(user));
-                })
-                .toList()
-                .cast<Widget>() +
-            neededPads);
-  }
-
-  Column userView(User user) {
-    return Column(children: [Text(user.username)]);
-  } 
 
   @override
   Widget build(BuildContext context) {
@@ -142,5 +87,68 @@ class _MyHomePageState extends State<MyHomePage> {
         child: const Icon(Icons.cached),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserContent();
+  }
+
+  void mapUserList(List chunkedUsers) {
+    setState(() {
+      _users = chunkedUsers
+          .map(<Iterable>(userRow) {
+            return mapUserRow(userRow);
+          })
+          .toList()
+          .cast<Widget>();
+    });
+  }
+
+  Row mapUserRow(List userRow) {
+    List<Widget> neededPads =
+        List<Widget>.filled(3 - userRow.length, const VerticalDivider());
+    return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: userRow
+                .map((user) {
+                  return userView(User.fromMap(user));
+                })
+                .toList()
+                .cast<Widget>() +
+            neededPads);
+  }
+
+  Row userView(User user) {
+    return Row(children: [
+      SizedBox(
+        width: 64,
+        height: 64,
+        child: Image(image: NetworkImage(user.avatar), fit: BoxFit.contain),
+      ),
+      Text(user.username),
+    ]);
+  }
+
+  void _fetchUserContent() async {
+    _fetchUserCount();
+    _fetchUserList();
+  }
+
+  void _fetchUserCount() async {
+    final response =
+        await client.get(Uri.parse('http://localhost:3000/users/count'));
+    var data = jsonDecode(response.body);
+    setState(() {
+      _counter = data['users_count'];
+    });
+  }
+
+  void _fetchUserList() async {
+    final response = await client.get(Uri.parse('http://localhost:3000/users'));
+
+    var data = jsonDecode(response.body);
+    mapUserList(partition(data['users'], 3).toList());
   }
 }
