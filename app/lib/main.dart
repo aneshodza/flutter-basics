@@ -4,6 +4,7 @@ import 'package:app/objects/user.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:quiver/iterables.dart';
+import 'package:app/user_edit.dart';
 
 void main() {
   runApp(const MyApp());
@@ -106,29 +107,67 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  Row mapUserRow(List userRow) {
+  Container mapUserRow(List userRow) {
     List<Widget> neededPads =
-        List<Widget>.filled(3 - userRow.length, const VerticalDivider());
-    return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: userRow
-                .map((user) {
-                  return userView(User.fromMap(user));
-                })
-                .toList()
-                .cast<Widget>() +
-            neededPads);
+        List<Widget>.filled(3 - userRow.length, const Spacer());
+
+    return Container(
+        padding: const EdgeInsets.only(top: 4.0),
+        child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: userRow
+                    .map((user) {
+                      return userView(User.fromMap(user));
+                    })
+                    .toList()
+                    .cast<Widget>() +
+                neededPads));
   }
 
-  Row userView(User user) {
-    return Row(children: [
-      SizedBox(
-        width: 64,
-        height: 64,
-        child: Image(image: NetworkImage(user.avatar), fit: BoxFit.contain),
-      ),
-      Text(user.username),
-    ]);
+  Expanded userView(User user) {
+    return Expanded(
+        flex: 1,
+        child: Row(children: [
+          SizedBox(
+            width: 64,
+            height: 64,
+            child: Container(
+              color: Colors.black,
+              padding: const EdgeInsets.all(2.0),
+              child:
+                  Image(image: NetworkImage(user.avatar), fit: BoxFit.contain),
+            ),
+          ),
+          userViewRight(user),
+        ]));
+  }
+
+  Container userViewRight(User user) {
+    return Container(
+        width: 150,
+        padding: const EdgeInsets.only(left: 3.0),
+        child: Column(children: [
+          Text(user.username),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(
+                  onPressed: () {
+                    routeToEdit(user);
+                  },
+                  child:
+                      const Text('edit', style: TextStyle(color: Colors.blue))),
+              Container(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: TextButton(
+                      onPressed: () {
+                        deleteUser(user);
+                      },
+                      child: const Text('delete',
+                          style: TextStyle(color: Colors.red)))),
+            ],
+          ),
+        ]));
   }
 
   void _fetchUserContent() async {
@@ -138,7 +177,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _fetchUserCount() async {
     final response =
-        await client.get(Uri.parse('http://localhost:3000/users/count'));
+        await client.get(Uri.parse('http://localhost:3000/user/count'));
     var data = jsonDecode(response.body);
     setState(() {
       _counter = data['users_count'];
@@ -146,9 +185,22 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _fetchUserList() async {
-    final response = await client.get(Uri.parse('http://localhost:3000/users'));
+    final response =
+        await client.get(Uri.parse('http://localhost:3000/user/all'));
 
     var data = jsonDecode(response.body);
     mapUserList(partition(data['users'], 3).toList());
+  }
+
+  void routeToEdit(User user) {
+    Navigator.push(context, MaterialPageRoute(builder: (context) {
+      return EditPage(title: user.username, userId: user.userId);
+    }));
+  }
+
+  void deleteUser(User user) async {
+    await client.delete(Uri.parse('http://localhost:3000/user/${user.userId}'));
+
+    _fetchUserContent();
   }
 }
