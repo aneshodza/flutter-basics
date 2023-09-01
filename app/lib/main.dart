@@ -194,7 +194,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void routeToEdit(User user) {
     Navigator.push(context, MaterialPageRoute(builder: (context) {
-      return EditPage(title: user.username, userId: user.userId);
+      return EditPage(username: user.username, userId: user.userId);
     }));
   }
 

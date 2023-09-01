@@ -2,6 +2,7 @@ import { createRandomUsers } from './create_fake.js';
 import express from 'express';
 
 const app = express()
+app.use(express.json());
 const port = 3000
 
 var users = createRandomUsers(10);
@@ -18,6 +19,7 @@ users.push({
 app.get('/', (_, res) => {
   res.json({message: 'I\'m alive!'})
 })
+
 app.get('/user/all', (_, res) => {
   res.json({users: users})
 })
@@ -40,6 +42,27 @@ app.delete('/user/:id', (req, res) => {
     res.status(404).send('User not found');
   }
 })
+
+app.patch('/user/:id', (req, res) => {
+  const userIdToUpdate = req.params.id;
+  const userIndexToUpdate = users.findIndex(u => u.userId === userIdToUpdate);
+
+  if (userIndexToUpdate === -1) {
+    res.status(404).send('User not found');
+    return;
+  }
+
+  const { username, email } = req.body;
+  if (!username && !email) {
+    res.status(400).send('Neither username nor email provided for update');
+    return;
+  }
+
+  users[userIndexToUpdate].username = username;
+  users[userIndexToUpdate].email = email;
+
+  res.status(200).send({ updatedUser: users[userIndexToUpdate] });
+});
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)

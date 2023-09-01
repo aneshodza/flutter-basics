@@ -16,4 +16,13 @@ class User {
     password = map['password'],
     birthdate = map['birthdate'],
     registeredAt = map['registeredAt'];
+
+  User.createEmpty()
+    : userId = '',
+    username = '',
+    email = '',
+    avatar = '',
+    password = '',
+    birthdate = '',
+    registeredAt = '';
 }
